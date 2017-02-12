@@ -22,10 +22,17 @@
     </params>
 </plugin>
 """
+import logging
+
 import Domoticz
 
 from domoavr import DomoticzAVR
+from domologger import DomoticzHandler
 from pioneer import PioneerDevice
+
+
+log = logging.getLogger()
+log.addHandler(DomoticzHandler(Domoticz))
 
 
 UNITS = {
@@ -40,11 +47,11 @@ def update_device(unit, n_value, s_value):
     if unit in Devices:
         if (Devices[unit].nValue != n_value
                 or Devices[unit].sValue != s_value):
-            Domoticz.Log('before update device')
-            dump_config_to_log()
+            log.debug('before update device')
+            dump_config_to_log(unit)
             Devices[unit].Update(nValue=n_value, sValue=s_value)
-            Domoticz.Log('after update device')
-            dump_config_to_log()
+            log.debug('after update device')
+            dump_config_to_log(unit)
 
 
 _avr_state = None
@@ -55,7 +62,14 @@ def onStart():
     global _avr_state
     global _avr_device
 
-    Domoticz.Log('onStart called')
+    if Parameters['Mode6'] == 'Debug':
+        Domoticz.Debugging(1)
+        log.setLevel(logging.DEBUG)
+    else:
+        Domoticz.Debugging(0)
+        log.setLevel(logging.INFO)
+
+    log.debug('onStart called')
 
     options = {
         'volume_max': 185,
@@ -65,11 +79,6 @@ def onStart():
         'volume_slider_max': 121,
         'volume_slider_min': 21,   # -70 dB
         }
-
-    if Parameters['Mode6'] == 'Debug':
-        Domoticz.Debugging(1)
-    else:
-        Domoticz.Debugging(0)
 
     _avr_state = DomoticzAVR(UNITS, options, update_device)
     _avr_device = PioneerDevice(_avr_state)
@@ -101,12 +110,12 @@ def onStart():
 
 
 def onStop():
-    Domoticz.Log('onStop called')
+    log.debug('onStop called')
 
 
 def onConnect(Status, Description):
-    Domoticz.Log('onConnect called\nStatus: ' + str(Status) +
-                 '\nDescription: ' + str(Description))
+    log.debug('onConnect called\nStatus: %s\nDescription: %s',
+              Status, Description)
     if Status == 0:
         _avr_device.connected = True
         Domoticz.Send(Message='?P\r')
@@ -116,31 +125,30 @@ def onConnect(Status, Description):
 
 
 def onMessage(Data, Status, Extra):
-    str_data = Data.decode('ASCII', 'ignore')
-    Domoticz.Log('onMessage called\nData: ' + str(str_data) +
-                 '\nStatus: ' + str(Status))
+    if log.isEnabledFor(logging.DEBUG):
+        str_data = Data.decode('ASCII', 'ignore')
+        log.debug('onMessage called\nData: %s\nStatus: %s',
+                  str_data, Status)
     _avr_device.readline(Data)
 
 
 def onCommand(Unit, Command, Level, Hue):
-    Domoticz.Log('onCommand called\nUnit: ' + str(Unit) +
-                 '\nCommand: ' + str(Command) +
-                 '\nLevel: ' + str(Level) +
-                 '\nHue: ' + str(Hue))
+    log.debug('onCommand called\nUnit: %s\nCommand: %s\nLevel: %s\nHue: %s',
+              Unit, Command, Level, Hue)
 
 
 def onNotification(Data):
-    Domoticz.Log('onNotification called\nData: ' + str(Data))
+    log.debug('onNotification called\nData: %s', Data)
 
 
 def onDisconnect():
-    Domoticz.Log('onDisconnect called')
+    log.debug('onDisconnect called')
     _avr_device.connected = False
 
 
 def onHeartbeat():
     if _avr_device.connected:
-        Domoticz.Log('onHeartbeat called')
+        log.debug('onHeartbeat called')
         Domoticz.Send(Message='?V\r')
         Domoticz.Send(Message='?FL\r')
     else:
@@ -148,26 +156,30 @@ def onHeartbeat():
 
 
 def dump_config_to_log(unit=None):
-    msg = ''
-    if unit is None:
-        msg += 'Device Parameters:\n'
-        for x in Parameters:
-            if Parameters[x] != '':
-                msg += "'" + x + "': '" + str(Parameters[x]) + "'\n"
-        msg += 'Device count: ' + str(len(Devices)) + '\n'
-        for x in Devices:
-            msg += "Device:           " + str(x) + "-" + str(Devices[x]) + '\n'
-            msg += "Device ID:       '" + str(Devices[x].ID) + "'\n"
-            msg += "Device Name:     '" + Devices[x].Name + "'\n"
-            msg += "Device nValue:    " + str(Devices[x].nValue) + '\n'
-            msg += "Device sValue:   '" + Devices[x].sValue + "'\n"
-            msg += "Device LastLevel: " + str(Devices[x].LastLevel) + '\n'
-    else:
-        x = unit
-        msg += "Device:           " + str(x) + "-" + str(Devices[x]) + '\n'
-        msg += "Device ID:       '" + str(Devices[x].ID) + "'\n"
-        msg += "Device Name:     '" + Devices[x].Name + "'\n"
-        msg += "Device nValue:    " + str(Devices[x].nValue) + '\n'
-        msg += "Device sValue:   '" + Devices[x].sValue + "'\n"
-        msg += "Device LastLevel: " + str(Devices[x].LastLevel) + '\n'
-    Domoticz.Debug(msg)
+    if log.isEnabledFor(logging.DEBUG):
+        def dump_unit(unit):
+            msg = 'Device: {}\n' \
+                  'Device ID: {}\n' \
+                  'Device Name: {}\n' \
+                  'Device nValue: {}\n' \
+                  'Device sValue: {}\n' \
+                  'Device LastLevel: {}'.format(unit,
+                                                Devices[unit].ID,
+                                                Devices[unit].Name,
+                                                Devices[unit].nValue,
+                                                Devices[unit].sValue,
+                                                Devices[unit].LastLevel)
+            return msg
+
+        if unit is not None:
+            log.debug(dump_unit(unit))
+        else:
+            msg = 'Device Parameters:'
+            for x in Parameters:
+                if Parameters[x] != '':
+                    msg += '\n{}: {}'.format(x, Parameters[x])
+            log.debug(msg)
+            msg = 'Device count: {}'.format(len(Devices))
+            for x in Devices:
+                msg += '\n{}'.format(dump_unit(x))
+            log.debug(msg)
