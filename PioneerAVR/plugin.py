@@ -3,11 +3,14 @@
 # Author: Olaf Conradi
 #
 """
-<plugin key="PioneerAVR" name="Pioneer AVR" author="Olaf Conradi" version="0.1">
+<plugin key="PioneerAVR" name="Pioneer AVR"
+        author="Olaf Conradi" version="0.1">
     <params>
-        <param field="Address" label="IP Address" default="192.168.1.177"
+        <param field="Address" label="IP Address"
+               default="192.168.1.177"
                width="250px" required="true"/>
-        <param field="Port" label="Port" default="8102"
+        <param field="Port" label="Port"
+               default="8102"
                width="50px" required="true"/>
         <param field="Mode6" label="Debug"
                width="75px">
