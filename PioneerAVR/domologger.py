@@ -10,6 +10,11 @@ log = logging.getLogger(__name__)
 
 
 def setup_logging(base_path, log_config_file, root_level='DEBUG'):
+    def fallback_logging():
+        root_log = logging.getLogger()
+        root_log.setLevel(logging.DEBUG)
+        root_log.addHandler(DomoticzHandler())
+
     if not os.path.isabs(log_config_file):
         log_config_file = os.path.join(base_path, log_config_file)
     if os.path.exists(log_config_file):
@@ -27,8 +32,11 @@ def setup_logging(base_path, log_config_file, root_level='DEBUG'):
         try:
             logging.config.dictConfig(config)
         except (ValueError, TypeError, AttributeError, ImportError):
+            fallback_logging()
             log.exception('Error loading logging configuration '
                           'from file %s', log_config_file)
+    else:
+        fallback_logging()
 
 
 class DomoticzHandler(logging.Handler):
