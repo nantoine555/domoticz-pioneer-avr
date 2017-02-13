@@ -4,7 +4,8 @@
 #
 """
 <plugin key="PioneerAVR" name="Pioneer AVR"
-        author="Olaf Conradi" version="0.1">
+        author="Olaf Conradi" version="0.1"
+        externallink="https://github.com/oohlaf/domoticz-pioneer-avr">
     <params>
         <param field="Address" label="IP Address"
                default="192.168.1.177"
