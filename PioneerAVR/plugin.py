@@ -40,8 +40,9 @@ log = logging.getLogger(__name__)
 UNITS = {
     'display': 1,
     'listening_mode': 2,
-    'main_sound_level': 3,
-    'main_volume': 4,
+    'playing_mode': 3,
+    'main_sound_level': 4,
+    'main_volume': 5,
     }
 
 
@@ -94,6 +95,10 @@ def onStart():
     if UNITS['listening_mode'] not in Devices:
         Domoticz.Device(Name="Listening Mode",
                         Unit=UNITS['listening_mode'],
+                        TypeName="Text").Create()
+    if UNITS['playing_mode'] not in Devices:
+        Domoticz.Device(Name="Playing Listening Mode",
+                        Unit=UNITS['playing_mode'],
                         TypeName="Text").Create()
     if UNITS['main_sound_level'] not in Devices:
         Domoticz.Device(Name="Sound Level Main Zone",
@@ -154,6 +159,8 @@ def onHeartbeat():
         log.debug('onHeartbeat called')
         Domoticz.Send(Message='?V\r')
         Domoticz.Send(Message='?FL\r')
+        Domoticz.Send(Message='?S\r')
+        Domoticz.Send(Message='?L\r')
     else:
         Domoticz.Connect()
 
