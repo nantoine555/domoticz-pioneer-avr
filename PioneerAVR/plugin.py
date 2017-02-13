@@ -34,7 +34,7 @@ from domologger import DomoticzHandler, setup_logging
 from pioneer import PioneerDevice
 
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 log.addHandler(DomoticzHandler())
 
