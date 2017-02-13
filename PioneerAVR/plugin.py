@@ -25,11 +25,7 @@
     </params>
 </plugin>
 """
-import json
 import logging
-import logging.config
-import os
-import pprint
 
 import Domoticz
 

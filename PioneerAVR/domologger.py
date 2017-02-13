@@ -1,6 +1,12 @@
+import json
 import logging
+import logging.config
+import os
 
 from Domoticz import Debug, Log, Error
+
+
+log = logging.getLogger(__name__)
 
 
 def setup_logging(base_path, log_config_file, root_level='DEBUG'):
