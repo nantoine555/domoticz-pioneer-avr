@@ -1,0 +1,34 @@
+{
+    "version": 1,
+    "disable_existing_loggers": false,
+    "formatters": {
+        "simple": {
+            "format": "%(levelname)-8s %(message)s"
+        },
+        "function": {
+            "format": "%(asctime)s %(levelname)-8s [%(name)s:%(funcName)s:%(lineno)d] %(message)s"
+        }
+    },
+    "handlers": {
+        "domo_handler": {
+            "class": "domologger.DomoticzHandler",
+            "formatter": "simple",
+            "level": "DEBUG"
+        },
+        "file_handler": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "function",
+            "level": "DEBUG",
+            "filename": "plugin.log",
+            "maxBytes": 1048576,
+            "backupCount": 20,
+            "encoding": "utf-8"
+        }
+    },
+    "loggers": {
+    },
+    "root": {
+        "level": "DEBUG",
+        "handlers": ["domo_handler", "file_handler"]
+    }
+}

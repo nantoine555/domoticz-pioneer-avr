@@ -12,27 +12,35 @@
         <param field="Port" label="Port"
                default="8102"
                width="50px" required="true"/>
-        <param field="Mode6" label="Debug"
+        <param field="Mode6" label="Log Level"
                width="75px">
             <options>
-                <option label="True" value="Debug"/>
-                <option label="False" value="Normal"/>
+                <option label="Debug" value="DEBUG" default="true"/>
+                <option label="Info" value="INFO"/>
+                <option label="Warning" value="WARNING"/>
+                <option label="Error" value="ERROR"/>
+                <option label="Critical" value="CRITICAL"/>
             </options>
         </param>
     </params>
 </plugin>
 """
+import json
 import logging
+import logging.config
+import os
+import pprint
 
 import Domoticz
 
 from domoavr import DomoticzAVR
-from domologger import DomoticzHandler
+from domologger import DomoticzHandler, setup_logging
 from pioneer import PioneerDevice
 
 
 log = logging.getLogger()
-log.addHandler(DomoticzHandler(Domoticz))
+log.setLevel(logging.DEBUG)
+log.addHandler(DomoticzHandler())
 
 
 UNITS = {
@@ -62,12 +70,13 @@ def onStart():
     global _avr_state
     global _avr_device
 
-    if Parameters['Mode6'] == 'Debug':
+    if Parameters['Mode6'] == 'DEBUG':
         Domoticz.Debugging(1)
-        log.setLevel(logging.DEBUG)
     else:
         Domoticz.Debugging(0)
-        log.setLevel(logging.INFO)
+    setup_logging(Parameters['HomeFolder'],
+                  'logging.json',
+                  Parameters['Mode6'])
 
     log.debug('onStart called')
 
