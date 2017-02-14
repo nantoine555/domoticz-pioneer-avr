@@ -9,17 +9,16 @@ from Domoticz import Debug, Log, Error
 log = logging.getLogger(__name__)
 
 
-def setup_logging(base_path, log_config_file, root_level='DEBUG'):
+def setup_logging(log_config_dict=None,
+                  log_config_file='logging.json',
+                  base_path=None,
+                  root_level='DEBUG'):
     def fallback_logging():
         root_log = logging.getLogger()
         root_log.setLevel(logging.DEBUG)
         root_log.addHandler(DomoticzHandler())
 
-    if not os.path.isabs(log_config_file):
-        log_config_file = os.path.join(base_path, log_config_file)
-    if os.path.exists(log_config_file):
-        with open(log_config_file, 'rt') as f:
-            config = json.load(f)
+    def make_abs_file_handlers(base_path, config):
         for handler in config['handlers']:
             try:
                 setting = config['handlers'][handler]['filename']
@@ -28,15 +27,39 @@ def setup_logging(base_path, log_config_file, root_level='DEBUG'):
             if not os.path.isabs(setting):
                 setting = os.path.join(base_path, setting)
                 config['handlers'][handler]['filename'] = setting
-        config['root']['level'] = root_level
+        return config
+
+    if log_config_dict is None and log_config_file is not None:
+        if base_path is not None and not os.path.isabs(log_config_file):
+            log_config_file = os.path.join(base_path, log_config_file)
         try:
-            logging.config.dictConfig(config)
+            with open(log_config_file, 'rt') as f:
+                try:
+                    log_config_dict = json.load(f)
+                except:
+                    fallback_logging()
+                    log.exception('Error loading JSON log configuration '
+                                  'from file %s', log_config_file)
+                    return
+        except OSError:
+            fallback_logging()
+            log.error('Could not open log configuration file %s',
+                      log_config_file)
+            return
+
+    if log_config_dict is not None:
+        if base_path is not None:
+            log_config_dict = make_abs_file_handlers(base_path, log_config_dict)
+        if root_level is not None:
+            log_config_dict['root']['level'] = root_level
+        try:
+            logging.config.dictConfig(log_config_dict)
         except (ValueError, TypeError, AttributeError, ImportError):
             fallback_logging()
-            log.exception('Error loading logging configuration '
-                          'from file %s', log_config_file)
+            log.exception('Error loading logging configuration')
     else:
         fallback_logging()
+        log.error('No logging configuration given')
 
 
 class DomoticzHandler(logging.Handler):

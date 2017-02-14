@@ -70,9 +70,8 @@ def onStart():
         Domoticz.Debugging(1)
     else:
         Domoticz.Debugging(0)
-    setup_logging(Parameters['HomeFolder'],
-                  'logging.json',
-                  Parameters['Mode6'])
+    setup_logging(base_path=Parameters['HomeFolder'],
+                  root_level=Parameters['Mode6'])
 
     log.debug('onStart called')
 
