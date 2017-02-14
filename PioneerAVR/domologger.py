@@ -3,7 +3,9 @@ import logging
 import logging.config
 import os
 
-from Domoticz import Debug, Log, Error
+from Domoticz import (Debug as DDebug,
+                      Log as DLog,
+                      Error as DError)
 
 
 log = logging.getLogger(__name__)
@@ -70,10 +72,10 @@ class DomoticzHandler(logging.Handler):
         try:
             msg = self.format(record)
             if record.levelno <= logging.DEBUG:
-                Debug(msg)
+                DDebug(msg)
             elif record.levelno <= logging.WARNING:
-                Log(msg)
+                DLog(msg)
             else:
-                Error(msg)
+                DError(msg)
         except Exception:
             self.handleError(record)
