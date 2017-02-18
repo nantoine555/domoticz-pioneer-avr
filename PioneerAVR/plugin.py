@@ -160,6 +160,7 @@ def onHeartbeat():
         Domoticz.Send(Message='?FL\r')
         Domoticz.Send(Message='?S\r')
         Domoticz.Send(Message='?L\r')
+        Domoticz.Send(Message='?AST\r')
     else:
         Domoticz.Connect()
 

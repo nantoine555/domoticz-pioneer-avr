@@ -501,7 +501,7 @@ class PioneerState():
         return self._output_channels
 
     @output_channels.setter
-    def output_frequency(self, channel):
+    def output_channels(self, channel):
         self._output_channels = channel
 
 
