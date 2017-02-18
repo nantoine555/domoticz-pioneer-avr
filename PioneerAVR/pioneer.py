@@ -350,8 +350,12 @@ class PioneerState():
         self._power = False
         self._volume = options['volume_min']
         self._volume_db = options['volume_db_min']
-        self._listening_mode = ''
-        self._playing_mode = ''
+        self._listening_mode = None
+        self._playing_mode = None
+        self._input_signal = None
+        self._input_frequency = None
+        self._input_channels = {}
+        self._output_channels = {}
 
     @property
     def connected(self):
@@ -448,7 +452,7 @@ class PioneerState():
         try:
             name = LISTENING_MODES[self._listening_mode]
         except KeyError:
-            log.warning('Unknown listening mode %s', mode)
+            log.warning('Unknown listening mode %s', self._listening_mode)
             name = ''
         return name
 
@@ -468,7 +472,8 @@ class PioneerState():
         try:
             name = PLAYING_MODES[self._playing_mode]
         except KeyError:
-            log.warning('Unknown playing listening mode %s', mode)
+            log.warning('Unknown playing listening mode %s',
+                        self._playing_mode)
             name = ''
         return name
 
@@ -481,12 +486,29 @@ class PioneerState():
         self._input_signal = signal
 
     @property
+    def input_signal_name(self):
+        try:
+            name = AUDIO_SIGNALS[self._input_signal]
+        except KeyError:
+            log.warning('Unknown audio input signal %s', self._input_signal)
+            name = ''
+        return name
+
+    @property
     def input_frequency(self):
         return self._input_frequency
 
     @input_frequency.setter
     def input_frequency(self, frequency):
         self._input_signal = frequency
+
+    @property
+    def input_frequency_hertz(self):
+        try:
+            freq = AUDIO_FREQUENCIES[self._input_frequency]
+        except KeyError:
+            log.warning('Unknown audio input frequency code %s',
+                        self._input_frequency)
 
     @property
     def input_channels(self):
@@ -582,37 +604,37 @@ class PioneerDevice():
         input_signal = data[3:5]
         input_frequency = data[5:7]
         input_channels = {
-            'L': on_off[data[7]],
-            'C': on_off[data[8]],
-            'R': on_off[data[9]],
-            'SL': on_off[data[10]],
-            'SR': on_off[data[11]],
-            'SBL': on_off[data[12]],
-            'S': on_off[data[13]],
-            'SBR': on_off[data[14]],
-            'LFE': on_off[data[15]],
-            'FHL': on_off[data[16]],
-            'FHR': on_off[data[17]],
-            'FWL': on_off[data[18]],
-            'FWR': on_off[data[19]],
-            'XL': on_off[data[20]],
-            'XC': on_off[data[21]],
-            'XR': on_off[data[22]],
+            'L': on_off.get(data[7], False),
+            'C': on_off.get(data[8], False),
+            'R': on_off.get(data[9], False),
+            'SL': on_off.get(data[10], False),
+            'SR': on_off.get(data[11], False),
+            'SBL': on_off.get(data[12], False),
+            'S': on_off.get(data[13], False),
+            'SBR': on_off.get(data[14], False),
+            'LFE': on_off.get(data[15], False),
+            'FHL': on_off.get(data[16], False),
+            'FHR': on_off.get(data[17], False),
+            'FWL': on_off.get(data[18], False),
+            'FWR': on_off.get(data[19], False),
+            'XL': on_off.get(data[20], False),
+            'XC': on_off.get(data[21], False),
+            'XR': on_off.get(data[22], False),
             }
         output_channels = {
-            'L': on_off[data[23]],
-            'C': on_off[data[24]],
-            'R': on_off[data[25]],
-            'SL': on_off[data[26]],
-            'SR': on_off[data[27]],
-            'SBL': on_off[data[28]],
-            'SB': on_off[data[29]],
-            'SBR': on_off[data[30]],
-            'SW': on_off[data[31]],
-            'FHL': on_off[data[32]],
-            'FHR': on_off[data[33]],
-            'FWL': on_off[data[34]],
-            'FWR': on_off[data[35]],
+            'L': on_off.get(data[23], False),
+            'C': on_off.get(data[24], False),
+            'R': on_off.get(data[25], False),
+            'SL': on_off.get(data[26], False),
+            'SR': on_off.get(data[27], False),
+            'SBL': on_off.get(data[28], False),
+            'SB': on_off.get(data[29], False),
+            'SBR': on_off.get(data[30], False),
+            'SW': on_off.get(data[31], False),
+            'FHL': on_off.get(data[32], False),
+            'FHR': on_off.get(data[33], False),
+            'FWL': on_off.get(data[34], False),
+            'FWR': on_off.get(data[35], False),
             }
         self._state.input_signal = input_signal
         self._state.input_frequency = input_frequency
