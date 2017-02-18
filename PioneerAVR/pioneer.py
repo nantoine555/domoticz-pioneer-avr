@@ -510,6 +510,7 @@ class PioneerDevice():
         self._state = state
         self._response_codes = {
             'VOL': self._parse_volume,
+            'MUT': self._parse_mute,
             'FL': self._parse_display,
             'PWR': self._parse_power,
             'SR': self._parse_listening_mode,
@@ -551,6 +552,10 @@ class PioneerDevice():
 
     def _parse_volume(self, data):
         self._state.volume = int(data[3:6])
+
+    def _parse_mute(self, data):
+        on_off = {'0': True, '1': False}
+        self._state.mute = on_off[data[3]]
 
     def _parse_display(self, data):
         display = ''
