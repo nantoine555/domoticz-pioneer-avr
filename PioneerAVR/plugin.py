@@ -144,8 +144,10 @@ def onCommand(Unit, Command, Level, Hue):
               Unit, Command, Level, Hue)
 
 
-def onNotification(Data):
-    log.debug('onNotification called\nData: %s', Data)
+def onNotification(Name, Subject, Text, Status, Priority, Sound, ImageFile):
+    log.debug('onNotification called\nName: %s\nSubject: %s\nText: %s\n'
+              'Status: %s\nPriority: %s\nSound: %s\nImageFile: %s',
+              Name, Subject, Text, Status, Priority, Sound, ImageFile)
 
 
 def onDisconnect():
