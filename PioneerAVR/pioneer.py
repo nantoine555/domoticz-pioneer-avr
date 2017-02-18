@@ -472,6 +472,38 @@ class PioneerState():
             name = ''
         return name
 
+    @property
+    def input_signal(self):
+        return self._input_signal
+
+    @input_signal.setter
+    def input_signal(self, signal):
+        self._input_signal = signal
+
+    @property
+    def input_frequency(self):
+        return self._input_frequency
+
+    @input_frequency.setter
+    def input_frequency(self, frequency):
+        self._input_signal = frequency
+
+    @property
+    def input_channels(self):
+        return self._input_channels
+
+    @input_channels.setter
+    def input_channels(self, channel):
+        self._input_channels = channel
+
+    @property
+    def output_channels(self):
+        return self._output_channels
+
+    @output_channels.setter
+    def output_frequency(self, channel):
+        self._output_channels = channel
+
 
 class PioneerDevice():
     def __init__(self, state):
@@ -482,7 +514,7 @@ class PioneerDevice():
             'PWR': self._parse_power,
             'SR': self._parse_listening_mode,
             'LM': self._parse_playing_mode,
-            # 'AST': self._parse_audio_mode,
+            'AST': self._parse_audio_mode,
             }
         if not FL_FONT:
             build_fl_font()
@@ -539,3 +571,45 @@ class PioneerDevice():
         mode = data[2:6]
         log.debug('Playing listening mode %s', mode)
         self._state.playing_mode = mode
+
+    def _parse_audio_mode(self, data):
+        on_off = {'0': False, '1': True}
+        input_signal = data[3:5]
+        input_frequency = data[5:7]
+        input_channels = {
+            'L': on_off[data[7]],
+            'C': on_off[data[8]],
+            'R': on_off[data[9]],
+            'SL': on_off[data[10]],
+            'SR': on_off[data[11]],
+            'SBL': on_off[data[12]],
+            'S': on_off[data[13]],
+            'SBR': on_off[data[14]],
+            'LFE': on_off[data[15]],
+            'FHL': on_off[data[16]],
+            'FHR': on_off[data[17]],
+            'FWL': on_off[data[18]],
+            'FWR': on_off[data[19]],
+            'XL': on_off[data[20]],
+            'XC': on_off[data[21]],
+            'XR': on_off[data[22]],
+            }
+        output_channels = {
+            'L': on_off[data[23]],
+            'C': on_off[data[24]],
+            'R': on_off[data[25]],
+            'SL': on_off[data[26]],
+            'SR': on_off[data[27]],
+            'SBL': on_off[data[28]],
+            'SB': on_off[data[29]],
+            'SBR': on_off[data[30]],
+            'SW': on_off[data[31]],
+            'FHL': on_off[data[32]],
+            'FHR': on_off[data[33]],
+            'FWL': on_off[data[34]],
+            'FWR': on_off[data[35]],
+            }
+        self._state.input_signal = input_signal
+        self._state.input_frequency = input_frequency
+        self._state.input_channels = input_channels
+        self._state.output_channels = output_channels
