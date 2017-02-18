@@ -30,9 +30,8 @@ import logging
 
 import Domoticz
 
-from domoavr import DomoticzAVR
 from domologger import DomoticzHandler, setup_logging
-from pioneer import PioneerDevice
+from pioneer import PioneerDevice, PioneerState
 
 
 log = logging.getLogger(__name__)
@@ -84,7 +83,7 @@ def onStart():
         'volume_slider_min': 21,   # -70 dB
         }
 
-    _avr_state = DomoticzAVR(UNITS, options, update_device)
+    _avr_state = PioneerState(UNITS, options, update_device)
     _avr_device = PioneerDevice(_avr_state)
 
     if UNITS['display'] not in Devices:
