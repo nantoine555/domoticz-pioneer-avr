@@ -1,3 +1,6 @@
+from pioneer import LISTENING_MODES, PLAYING_MODES
+
+
 class DomoticzAVR():
     def __init__(self, units, options, update_device):
         # Config
@@ -12,9 +15,7 @@ class DomoticzAVR():
         self._volume = options['volume_min']
         self._volume_db = options['volume_db_min']
         self._listening_mode = ''
-        self._listening_mode_name = ''
         self._playing_mode = ''
-        self._playing_mode_name = ''
 
     @property
     def connected(self):
@@ -102,17 +103,18 @@ class DomoticzAVR():
     @listening_mode.setter
     def listening_mode(self, mode):
         self._listening_mode = mode
+        self._update_device(self._units['listening_mode'],
+                            0,
+                            str(self.listening_mode_name))
 
     @property
     def listening_mode_name(self):
-        return self._listening_mode
-
-    @listening_mode_name.setter
-    def listening_mode_name(self, name):
-        self._listening_mode_name = name
-        self._update_device(self._units['listening_mode'],
-                            0,
-                            str(self._listening_mode_name))
+        try:
+            name = LISTENING_MODES[self._listening_mode]
+        except KeyError:
+            log.warning('Unknown listening mode %s', mode)
+            name = ''
+        return name
 
     @property
     def playing_mode(self):
@@ -121,14 +123,15 @@ class DomoticzAVR():
     @playing_mode.setter
     def playing_mode(self, mode):
         self._playing_mode = mode
+        self._update_device(self._units['playing_mode'],
+                            0,
+                            str(self.playing_mode_name))
 
     @property
     def playing_mode_name(self):
-        return self._playing_mode
-
-    @playing_mode_name.setter
-    def playing_mode_name(self, name):
-        self._playing_mode_name = name
-        self._update_device(self._units['playing_mode'],
-                            0,
-                            str(self._playing_mode_name))
+        try:
+            name = PLAYING_MODES[self._playing_mode]
+        except KeyError:
+            log.warning('Unknown playing listening mode %s', mode)
+            name = ''
+        return name

@@ -398,18 +398,8 @@ class PioneerDevice():
         mode = data[2:6]
         log.debug('Listening mode %s', mode)
         self._state.listening_mode = mode
-        try:
-            self._state.listening_mode_name = LISTENING_MODES[mode]
-        except KeyError:
-            log.warning('Unknown listening mode %s', mode)
-            self._state.listening_mode_name = ''
 
     def _parse_playing_mode(self, data):
         mode = data[2:6]
         log.debug('Playing listening mode %s', mode)
         self._state.playing_mode = mode
-        try:
-            self._state.playing_mode_name = PLAYING_MODES[mode]
-        except KeyError:
-            log.warning('Unknown playing listening mode %s', mode)
-            self._state.playing_mode_name = ''
